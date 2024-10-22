@@ -1,0 +1,251 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/INGEVANSCHAIKKROON/KassenZettel_simpleAPI/1.0.0
+info:
+  description: This is the API for the digital receipt application
+  version: "1.0.0"
+  title: Digital receipt 
+  contact:
+    email: inge.van.schaik-kroon@cgi.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: receiptApplication
+    description: Application for processing receipts and links
+  - name: cashierSystem
+    description: The cashier system in the shop
+paths:
+  /v1/receiptApplication/url:
+    post:
+      operationId: generateUrl
+      summary: generates a URLs and an ID for this receipt
+      tags: [ReceiptApplication]
+      responses: 
+        '201':
+          description: URLs and ID created 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UrlResponse'           
+        '401': 
+          description: unauthorized
+        '403': 
+          description: forbidden                
+        '500':
+          description: Something went wrong
+  /v1/receiptApplication/{receiptId}:
+    parameters:
+      - in: path
+        name: receiptId
+        required: true
+        schema: 
+          type: integer
+          format: int64
+    put:
+      operationId: storeReceipt
+      summary: create a pdf from the json data and store the receipt with the receiptId in the DB
+      tags: [ReceiptApplication]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Receipt'
+        description: Receipt to be stored     
+      responses: 
+        '204':
+          description: Receipt and ID stored successfully
+        '401': 
+          description: unauthorized
+        '403': 
+          description: forbidden          
+        '500':
+          description: Something went wrong 
+          content:
+            text/plain:
+              schema:
+                type: string          
+    get:
+      operationId: getReceipt
+      summary: get the receipt (json) from the DB using receiptId
+      tags: [ReceiptApplication]      
+      responses: 
+        '200':
+          description: OK 
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Receipt'
+        '400': 
+          description: bad request
+        '401': 
+          description: unauthorized
+        '403': 
+          description: forbidden          
+        '404': 
+          description: not found
+          content:
+            text/plain:
+              schema:
+                type: string               
+        '500':
+          description: Something went wrong 
+          content:
+            text/plain:
+              schema:
+                type: string          
+    delete:
+      operationId: deleteReceipt
+      summary: delete the receipt from the DB using the receiptId   
+      tags: [ReceiptApplication]      
+      responses: 
+        '204':
+          description: Receipt deleted 
+        '400': 
+          description: bad request
+        '401': 
+          description: unauthorized
+        '403': 
+          description: forbidden          
+        '404': 
+          description: not found 
+          content:
+            text/plain:
+              schema:
+                type: string           
+        '500':
+          description: Something went wrong
+          content:
+            text/plain:
+              schema:
+                type: string
+  /v1/receiptApplication/{receiptId}/pdf:
+    get:
+      operationId: getReceiptPdf
+      summary: get the receipt (pdf) from the DB using receipt-id
+      tags: [ReceiptApplication]      
+      parameters:
+        - in: path
+          name: receiptId
+          required: true
+          schema: 
+            type: integer 
+            format: int64
+      responses: 
+        '200':
+          description: OK, pdf file returned
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400': 
+          description: bad request
+        '401': 
+          description: unauthorized
+        '403': 
+          description: forbidden
+        '404': 
+          description: not found   
+          content:
+            text/plain:
+              schema:
+                type: string          
+        '500':
+          description: Something went wrong
+          content:
+            text/plain:
+              schema:
+                type: string          
+  /ping:
+    get:
+      responses:
+        "200":
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
+  /cashier/makeReceipt:
+    post:
+      operationId: makeReceipt
+      summary: creates a receipt with all the information
+      tags: [cashierSystem]      
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Receipt'
+        description: Receipt to be created
+      responses: 
+       '200':
+        description: OK - receipt added
+       '500':
+         description: Something went wrong
+         content:
+           text/plain:
+             schema:
+               type: string         
+  /cashier/getReceipt/{transactionId}:
+    get:
+      operationId: getReceipt2
+      summary: gets a receipt with all the information
+      tags: [cashierSystem]       
+      parameters:
+        - in: path
+          name: transactionId
+          required: true
+          schema: 
+            type: integer
+      responses: 
+       '200':
+        description: OK 
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Receipt'  
+       '500':
+         description: Something went wrong
+         content:
+           text/plain:
+             schema:
+               type: string                 
+components:
+  schemas:
+    Receipt:
+      type: object
+      required: 
+        - transactionId
+        - purchases
+        - currency
+        - amount
+      properties:
+        transactionId:
+          type: integer
+          format: int64
+        purchases:
+          type: string
+        currency:
+          type: string
+          enum:
+            - Euro
+            - Dollar
+        amount:  
+          type: number
+          format: float
+    UrlResponse:
+      type: object
+      required: 
+        - receiptId
+        - receiptUrl
+      properties:
+        receiptId:
+          type: integer
+          format: int64
+        receiptUrl: 
+          type: string
