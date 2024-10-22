@@ -4,7 +4,7 @@ servers:
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/INGEVANSCHAIKKROON/KassenZettel_simpleAPI/1.0.0
 info:
-  description: This is the API for the digital receipt application
+  description: This is the API for the digital receipt application stored in GIT
   version: "1.0.0"
   title: Digital receipt 
   contact:
